@@ -1,6 +1,9 @@
 #include <QMouseEvent>
 #include <QGuiApplication>
 
+#include <glew.h>
+#include <glfw3.h>
+
 #include "NGLScene.h"
 #include <ngl/Camera.h>
 #include <ngl/Light.h>
@@ -66,6 +69,58 @@ void NGLScene::initialize()
   glEnable(GL_DEPTH_TEST);
   // enable multisampling for smoother drawing
   glEnable(GL_MULTISAMPLE);
+
+  const GLchar* computeSourcePath = "./shaders/rayTracer.glslcs";
+      std::string computeCode;
+  std::ifstream cShaderFile;
+  cShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+  try
+  {
+      //Open File
+    cShaderFile.open(computeSourcePath);
+    std::stringstream cShaderStream;
+    // Read file buffer contents into streams
+    cShaderStream << cShaderFile.rdbuf();
+    // close file handler
+    cShaderFile.close();
+    // Convert stream into GLchar array
+    computeCode = cShaderStream.str();
+  }
+  catch(std::ifstream::failure e)
+  {
+    std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+  }
+  const GLchar* cShaderCode = computeCode.c_str();
+
+  GLuint compute;
+  GLint success;
+  GLchar infoLog[512];
+
+    // Vertex Shader
+    compute = glCreateShader(GL_COMPUTE_SHADER);
+    glShaderSource(compute, 1, &cShaderCode, NULL);
+    glCompileShader(compute);
+
+    // Print Compile Errors if any
+    glGetShaderiv(compute, GL_COMPILE_STATUS, &success);
+    if(!success)
+    {
+      glGetShaderInfoLog(compute, 512,NULL,infoLog);
+      std::cout<<"ERROR::SHADER::COMPUTE::COMPILATION_FAILED\n"<< infoLog << std::endl;
+    }
+
+    traceShader = glCreateProgram();
+    glAttachShader(traceShader, compute);
+    glLinkProgram(traceShader);
+    //Print linking errors if any
+    glGetProgramiv(traceShader, GL_LINK_STATUS, &success);
+    if(!success)
+    {
+      glGetProgramInfoLog(traceShader, 512, NULL, infoLog);
+      std::cout<<"ERROR::SHADER::pROGRAM::LINKING_FAILED\n"<< infoLog<<std::endl;
+    }
+
+    glDeleteShader(compute);
 
   shader = new Shader("./shaders/PhongVertex.glsl", "./shaders/PhongFragment.glsl");
   shader->Use();

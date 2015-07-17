@@ -20,12 +20,14 @@ SOURCES+= $$PWD/src/*.cpp
 # same for the .h files
 HEADERS+= $$PWD/include/*.h
 # and add the include dir into the search path for Qt and make
-INCLUDEPATH +=./include \ C:\opengl-wappers\glew-1.10.0\include\GL\
+INCLUDEPATH +=./include \ C:/opengl-wappers/glew-1.10.0/include/GL/ \ C:/opengl-wappers/glfw-3.0.4.bin.WIN32/include/GLFW
+LIBS += -L "C:/opengl-wappers/glew-1.10.0/lib/Release/x64" -glew32s.lib
+LIBS += -L "C:/opengl-wappers/glfw-3.0.4.bin.WIN32/lib-msvc120" -glfw3.lib
 # where our exe is going to live (root of project)
 DESTDIR=./
 # add the glsl shader files
-OTHER_FILES+= shaders/*.glsl \
-							README.md
+OTHER_FILES+= shaders/*.glsl
+OTHER_FILES+= shaders/*.glslcs
 # were are going to default to a console app
 CONFIG += console
 # note each command you add needs a ; as it will be run as a single line
@@ -81,4 +83,7 @@ win32: {
         LIBS += -LC:/NGL/lib/ -lNGL
         DEFINES+=NO_DLL
 }
+
+DISTFILES += \
+    shaders/rayTracer.glslcs
 

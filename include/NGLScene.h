@@ -133,6 +133,7 @@ private:
     GLuint VAO;
     GLuint VBO;
     Shader *shader;
+    GLuint traceShader;
 
 };
 
